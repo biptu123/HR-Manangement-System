@@ -5,20 +5,23 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterCompanyRequest;
 use App\Http\Resources\UserResource;
+use App\Mail\WelcomeEmail;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Mail;
 
 class RegisterCompanyController extends Controller
 {
     public function store(RegisterCompanyRequest $request)
     {
 
-        $user = DB::transaction(function () use ($request) {
+        $data = DB::transaction(function () use ($request) {
             // * Create the Company
             $company = Company::create([
                 'name' => $request->company_name,
@@ -46,8 +49,16 @@ class RegisterCompanyController extends Controller
                 'user_code' => $userCode,
             ]);
 
-            return $user;
+            return [
+                'user' => $user,
+                'user_code' => $userCode,
+            ];
         });
+
+        $user = $data['user'];
+        $userCode = $data['user_code'];
+
+        Mail::to($user->email)->send(new WelcomeEmail($user, $userCode));
 
 
         return response()->json([

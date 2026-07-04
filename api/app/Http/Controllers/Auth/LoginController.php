@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 
@@ -34,14 +36,32 @@ class LoginController extends Controller
             $request->merge(['user_code' => $loginId]);
         }
 
-        // 2. Validate credentials
+        // 2. Validate credentials FIRST (Security best practice)
         if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
-                'login_id' => ['The provided credentials are incorrect.'],
+                'id' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        // 3. Eager load the companies and pivot data
+        // 3. Check if email is verified
+        if (! $user->hasVerifiedEmail()) {
+            
+            // Get the user_code to pass to the Mailable. 
+            // If they logged in with email, grab their first company's pivot code.
+            // If they logged in with user_code, just use that.
+            $userCode = $isEmail 
+                ? ($user->companies()->first()->pivot->user_code ?? 'N/A') 
+                : $loginId;
+
+            // Send the custom Welcome/Verification email (passing null for password)
+            Mail::to($user->email)->send(new WelcomeEmail($user, $userCode, null));
+
+            return response()->json([
+                'message' => 'Your email address is not verified. A new verification link has been sent to your email.'
+            ], 403);
+        }
+
+        // 4. Eager load the companies and pivot data
         $user->load('companies');
         $token = $user->createToken('auth_token')->plainTextToken;
 
