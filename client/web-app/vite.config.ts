@@ -1,18 +1,26 @@
 import { defineConfig } from "vite";
+import path from "path";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+
   plugins: [
     react(),
+    tailwindcss(),
     babel({ presets: [reactCompilerPreset()] }),
     VitePWA({
-      registerType: "autoUpdate", // Automatically updates the app when you push new code
+      registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       workbox: {
-        // This is the magic that caches your app for offline use
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
       },
       manifest: {
