@@ -10,7 +10,7 @@ return new class extends Migration
     {
         //  Companies Table
         Schema::create('companies', function (Blueprint $table) {
-            $table->ulid('id')->primary();
+            $table->ulid('id')->primary(); // 1 - walgi
             $table->string('name');
             $table->string('domain')->nullable();
             $table->string('logo_url')->nullable();
@@ -20,7 +20,7 @@ return new class extends Migration
         //  Roles Table
         Schema::create('roles', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignUlid('company_id')->constrained('companies')->cascadeOnDelete(); // 1 - Adimn 
             $table->string('name'); // e.g., 'ADMIN', 'EMPLOYEE'
             $table->json('permissions')->nullable();
             $table->timestamps();
