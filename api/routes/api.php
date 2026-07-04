@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterCompanyController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/upload/logo', [UploadController::class, 'storeLogo']);
 Route::post('/register', [RegisterCompanyController::class, 'store']);
 Route::post('/login', [LoginController::class, 'store']);
 

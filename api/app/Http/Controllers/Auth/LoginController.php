@@ -3,36 +3,50 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
-    public function store(Request $request)
+    public function store(LoginRequest $request)
     {
-        $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $loginId = $request->input('id');
+        $password = $request->input('password');
 
-        $user = User::where('email', $request->email)->first();
+        // 1. Determine if the input is an email address
+        $isEmail = filter_var($loginId, FILTER_VALIDATE_EMAIL);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if ($isEmail) {
+            // Find by email
+            $user = User::where('email', $loginId)->first();
+        } else {
+            // Find by user_code inside the company_user pivot table
+            $user = User::whereHas('companies', function ($query) use ($loginId) {
+                $query->where('company_user.user_code', $loginId);
+            })->first();
+
+            // Merge the user_code into the request so the UserResource 
+            // knows exactly which company to return in the JSON response
+            $request->merge(['user_code' => $loginId]);
+        }
+
+        // 2. Validate credentials
+        if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'login_id' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        // Eager load the associated companies (includes pivot data like role_id)
+        // 3. Eager load the companies and pivot data
         $user->load('companies');
-
-        // Generate the plain text token for the  client
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
             'message' => 'Login successful'
         ]);
@@ -40,7 +54,6 @@ class LoginController extends Controller
 
     public function destroy(Request $request)
     {
-        // Revoke the token that was used to authenticate the current request
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

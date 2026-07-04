@@ -33,7 +33,7 @@ return new class extends Migration
             $table->foreignUlid('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignUlid('role_id')->constrained('roles')->cascadeOnDelete();
             $table->timestamps();
-
+            $table->string('user_code')->unique();
             //! A user can only have one active role per company
             $table->unique(['company_id', 'user_id']);
         });

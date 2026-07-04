@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterCompanyRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
@@ -13,47 +15,42 @@ use Illuminate\Validation\Rules;
 
 class RegisterCompanyController extends Controller
 {
-    public function store(Request $request)
+    public function store(RegisterCompanyRequest $request)
     {
-        $request->validate([
-            'company_name' => ['required', 'string', 'max:255'],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
 
         $user = DB::transaction(function () use ($request) {
-            // 1. Create the Company
+            // * Create the Company
             $company = Company::create([
                 'name' => $request->company_name,
+                'logo_url' => $request->logo_url,
             ]);
 
-            // 2. Create default roles for this company
+            // * Create default roles for this company
             $adminRole = $company->roles()->create(['name' => 'ADMIN']);
             $company->roles()->create(['name' => 'EMPLOYEE']);
 
-            // 3. Create the Admin User
+            // * Create the Admin User
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
+                'phone' => $request->phone,
                 'password' => Hash::make($request->password),
             ]);
 
-            // 4. Link User to Company as Admin
+            $userCode = $company->generateUserCode($user);
+
+            // * Link User to Company as Admin
             $company->users()->attach($user->id, [
                 'id' => \Illuminate\Support\Str::ulid(), // Pivot needs an ID
-                'role_id' => $adminRole->id
+                'role_id' => $adminRole->id,
+                'user_code' => $userCode,
             ]);
 
             return $user;
         });
 
-        // 5. Generate Sanctum Token for immediate login
-        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
-            'token' => $token,
             'message' => 'Company and Admin registered successfully'
         ], 201);
     }
