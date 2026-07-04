@@ -1,0 +1,21 @@
+{
+    "name": "deploy@hrms",
+    "version": "1.0.0",
+    "description": "<p align=\"center\"><a href=\"https://laravel.com\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg\" width=\"400\" alt=\"Laravel Logo\"></a></p>",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "main": "deploy.js",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "deploy": "node .",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "adm-zip": "^0.5.17",
+        "basic-ftp": "^6.0.1",
+        "dotenv": "^17.4.2"
+    }
+}
