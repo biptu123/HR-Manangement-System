@@ -46,7 +46,6 @@ interface CurrentUser {
   department: string;
   email: string;
   phone: string;
-  location: string;
   joinDate: string;
 }
 
@@ -61,7 +60,6 @@ const CURRENT_USER: CurrentUser = {
   department: 'Design',
   email: 'aditi.sharma@company.com',
   phone: '+91 98765 43210',
-  location: 'Guwahati, IN',
   joinDate: 'March 12, 2022',
 };
 
@@ -105,13 +103,13 @@ const useDashboardStore = create<DashboardState>((set) => ({
    ========================================================================= */
 
 const AVATAR_PALETTE = [
-  { bg: 'bg-indigo-100', text: 'text-indigo-700' },
-  { bg: 'bg-violet-100', text: 'text-violet-700' },
-  { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-  { bg: 'bg-amber-100', text: 'text-amber-700' },
-  { bg: 'bg-rose-100', text: 'text-rose-700' },
-  { bg: 'bg-sky-100', text: 'text-sky-700' },
-  { bg: 'bg-fuchsia-100', text: 'text-fuchsia-700' },
+  { bg: 'bg-[#e8f0e0]', text: 'text-[#4f8f1f]' },
+  { bg: 'bg-[#eef1e8]', text: 'text-[#5a7a3a]' },
+  { bg: 'bg-[#e6ede0]', text: 'text-[#437a1a]' },
+  { bg: 'bg-[#f0ede4]', text: 'text-[#7a6a3a]' },
+  { bg: 'bg-[#eeeae4]', text: 'text-[#8a6a4a]' },
+  { bg: 'bg-[#e4ede8]', text: 'text-[#3a6a6a]' },
+  { bg: 'bg-[#ece4ee]', text: 'text-[#6a4a7a]' },
 ];
 
 function getInitials(name: string): string {
@@ -155,31 +153,16 @@ function Avatar({ name, className = '' }: { name: string; className?: string }) 
   );
 }
 
-function StatusIcon({ presence }: { presence: EmployeePresence }) {
-  return (
-    <div
-      title={PRESENCE_LABEL[presence]}
-      className="flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-900/5"
-    >
-      {presence === 'present' && (
-        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
-      )}
-      {presence === 'on_leave' && <Plane className="h-3.5 w-3.5 text-sky-500" strokeWidth={2.5} />}
-      {presence === 'absent' && <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />}
-    </div>
-  );
-}
-
 function StatusPill({ presence }: { presence: EmployeePresence }) {
   const textColor =
-    presence === 'present' ? 'text-emerald-700' : presence === 'on_leave' ? 'text-sky-700' : 'text-amber-700';
-  const bg = presence === 'present' ? 'bg-emerald-50' : presence === 'on_leave' ? 'bg-sky-50' : 'bg-amber-50';
+    presence === 'present' ? 'text-[#4f8f1f]' : presence === 'on_leave' ? 'text-[#666666]' : 'text-amber-700';
+  const bg = presence === 'present' ? 'bg-[#4f8f1f]/10' : presence === 'on_leave' ? 'bg-[#eeeae4]' : 'bg-amber-50';
 
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full ${bg} px-3 py-1 text-xs font-medium ${textColor}`}>
-      {presence === 'present' && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+      {presence === 'present' && <span className="h-1.5 w-1.5 rounded-full bg-[#4f8f1f]" />}
       {presence === 'on_leave' && <Plane className="h-3 w-3" strokeWidth={2.5} />}
-      {presence === 'absent' && <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
+      {presence === 'absent' && <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
       {PRESENCE_LABEL[presence]}
     </span>
   );
@@ -194,35 +177,54 @@ function CheckInToggle() {
   const isCheckedIn = attendanceStatus === 'checked_in';
 
   return (
-    <div className="flex flex-col items-center">
-      <motion.button
-        type="button"
-        onClick={isCheckedIn ? checkOut : checkIn}
-        whileTap={{ scale: 0.9 }}
-        title={isCheckedIn ? 'Check out' : 'Check in'}
-        className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-50"
-      >
-        <span
-          className={`h-3 w-3 rounded-full transition-colors duration-200 ${
-            isCheckedIn
-              ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'
-              : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
-          }`}
-        />
-      </motion.button>
+    <div className="relative flex flex-col items-center justify-center">
+      {/* Tactile Switch Wrapper */}
+      <div className="flex items-center gap-2 rounded-full border border-[#e4e4e1] bg-[#f8f8f6] p-1 shadow-inner">
 
-      <AnimatePresence>
-        {isCheckedIn && checkInTime && (
+        {/* Hidden/Status Label on the left for context */}
+        <span className={`pl-2.5 text-xs font-semibold select-none tracking-tight transition-colors duration-200 ${isCheckedIn ? 'text-[#4f8f1f]' : 'text-[#7c7c7c]'
+          }`}>
+          {isCheckedIn ? 'Checked In' : 'Checked Out'}
+        </span>
+
+        {/* Master Slider Button */}
+        <button
+          type="button"
+          onClick={isCheckedIn ? checkOut : checkIn}
+          title={isCheckedIn ? 'Click to Check Out' : 'Click to Check In'}
+          className={`relative flex h-7 w-12 items-center rounded-full p-0.5 transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-[#4f8f1f]/40 ${isCheckedIn ? 'bg-[#4f8f1f]' : 'bg-red-500'
+            }`}
+        >
+          {/* Animated Slider Nub */}
           <motion.span
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="mt-1 text-[11px] font-medium text-slate-400"
+            layout
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            className="h-6 w-6 rounded-full bg-white shadow-md flex items-center justify-center"
+            style={{ x: isCheckedIn ? '18px' : '0px' }}
           >
-            Since {formatTime(checkInTime)}
+            {/* Center core accent inside the toggle knob */}
+            <span className={`h-2 w-2 rounded-full transition-colors duration-200 ${isCheckedIn ? 'bg-[#4f8f1f]' : 'bg-red-500'
+              }`} />
           </motion.span>
-        )}
-      </AnimatePresence>
+        </button>
+      </div>
+
+      {/* Timestamp Container - Absolutely positioned to prevent jumping/shifting the Navbar layout */}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 w-max pt-0.5">
+        <AnimatePresence mode="wait">
+          {isCheckedIn && checkInTime && (
+            <motion.span
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="block text-[10px] font-semibold text-[#999999] tracking-wide uppercase bg-white px-1.5 rounded"
+            >
+              Since {formatTime(checkInTime)}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -249,17 +251,16 @@ function AvatarMenu({ user }: { user: CurrentUser }) {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-slate-50"
+        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-[#f8f8f6]"
       >
         <div className="relative">
           <Avatar name={user.name} className="h-9 w-9 text-sm ring-2 ring-white" />
           <span
-            className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white transition-colors duration-300 ${
-              isCheckedIn ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]' : 'bg-red-500'
-            }`}
+            className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white transition-colors duration-300 ${isCheckedIn ? 'bg-[#4f8f1f] shadow-[0_0_6px_rgba(79,143,31,0.5)]' : 'bg-red-500'
+              }`}
           />
         </div>
-        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 text-[#999999] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -269,14 +270,14 @@ function AvatarMenu({ user }: { user: CurrentUser }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute right-0 top-12 w-52 origin-top-right rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-slate-900/5"
+            className="absolute right-0 top-12 w-52 origin-top-right rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-[#e4e4e1]"
           >
             <div className="px-3 py-2.5">
-              <p className="truncate text-sm font-semibold text-slate-800">{user.name}</p>
-              <p className="truncate text-xs text-slate-400">{user.role}</p>
+              <p className="truncate text-sm font-semibold text-[#333333]">{user.name}</p>
+              <p className="truncate text-xs text-[#999999]">{user.role}</p>
             </div>
-            <div className="my-1 h-px bg-slate-100" />
-            <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">
+            <div className="my-1 h-px bg-[#e4e4e1]" />
+            <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-[#444444] transition-colors hover:bg-[#f8f8f6]">
               <UserIcon className="h-4 w-4" strokeWidth={2} />
               My Profile
             </button>
@@ -301,14 +302,14 @@ function Navbar({ currentUser }: { currentUser: CurrentUser }) {
   const { activeTab, setActiveTab } = useDashboardStore();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-100 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-[#e4e4e1] bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4f8f1f]">
             <Users2 className="h-4 w-4 text-white" strokeWidth={2.25} />
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-slate-800">AcmeCorp</span>
+          <span className="text-[15px] font-semibold tracking-tight text-[#333333]">AcmeCorp</span>
         </div>
 
         {/* Center tabs */}
@@ -317,15 +318,14 @@ function Navbar({ currentUser }: { currentUser: CurrentUser }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative py-5 text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'font-semibold text-slate-900'
-                  : 'font-medium text-slate-400 hover:text-slate-600'
-              }`}
+              className={`relative py-5 text-sm transition-colors ${activeTab === tab.id
+                ? 'font-semibold text-[#333333]'
+                : 'font-medium text-[#999999] hover:text-[#666666]'
+                }`}
             >
               {tab.label}
               {activeTab === tab.id && (
-                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-indigo-600" />
+                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-[#4f8f1f]" />
               )}
             </button>
           ))}
@@ -334,7 +334,7 @@ function Navbar({ currentUser }: { currentUser: CurrentUser }) {
         {/* Right actions */}
         <div className="flex items-center gap-4">
           <CheckInToggle />
-          <div className="h-8 w-px bg-slate-100" />
+          <div className="h-8 w-px bg-[#e4e4e1]" />
           <AvatarMenu user={currentUser} />
         </div>
       </div>
@@ -358,29 +358,29 @@ function ActionBar({
   return (
     <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Employees</h1>
-        <p className="mt-1 text-sm text-slate-400">{resultCount} people on the team</p>
+        <h1 className="text-2xl font-bold tracking-tight text-[#333333]">Employees</h1>
+        <p className="mt-1 text-sm text-[#7c7c7c]">{resultCount} people on the team</p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         {/* New employee */}
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition-all hover:shadow-md"
+          className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[#4f8f1f] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#437a1a]"
         >
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           New Employee
         </button>
 
         {/* Search */}
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <div className="relative w-full sm:w-auto">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999999]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search employees..."
-            className="w-64 rounded-full border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-shadow focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-full border border-[#d7d7d2] bg-white py-2.5 pl-10 pr-4 text-sm text-[#333333] placeholder:text-[#ababab] outline-none transition-shadow focus:border-[#4f8f1f]/40 focus:ring-1 focus:ring-[#4f8f1f] sm:w-64"
           />
         </div>
       </div>
@@ -414,7 +414,7 @@ function EmployeeCardMenu({ employee }: { employee: Employee }) {
           event.stopPropagation();
           setOpen((prev) => !prev);
         }}
-        className="rounded-full p-1 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500"
+        className="rounded-full p-1 text-[#c4c4c0] transition-colors hover:bg-[#f8f8f6] hover:text-[#7c7c7c]"
       >
         <MoreVertical className="h-4 w-4" />
       </button>
@@ -422,20 +422,30 @@ function EmployeeCardMenu({ employee }: { employee: Employee }) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.14, ease: 'easeOut' }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }} // Clean, premium ease-out feel
             onClick={(event) => event.stopPropagation()}
-            className="absolute right-0 top-8 z-10 w-40 origin-top-right rounded-xl bg-white p-1.5 shadow-lg ring-1 ring-slate-900/5"
+            // CHANGED: Fixed z-60 to z-30 (keeps it above cards but under main nav overlays)
+            className="absolute right-0 top-full mt-1.5 z-30 w-40 origin-top-right rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-[#e4e4e1]"
           >
-            <button className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">
+            <button
+              type="button"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-[#444444] transition-colors hover:bg-[#f8f8f6]"
+            >
               View profile
             </button>
-            <button className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">
+            <button
+              type="button"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-[#444444] transition-colors hover:bg-[#f8f8f6]"
+            >
               Edit
             </button>
-            <button className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50">
+            <button
+              type="button"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+            >
               Remove
             </button>
           </motion.div>
@@ -456,32 +466,18 @@ function EmployeeCard({ employee, onSelect }: { employee: Employee; onSelect: (e
       }}
       whileHover={{ y: -2 }}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className="group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      // CHANGED: added "relative z-10 hover:z-20" here
+      className="group relative z-10 hover:z-20 flex w-full cursor-pointer items-center gap-3.5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e4e4e1] transition-shadow duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4f8f1f]"
     >
-      {/* Avatar with presence ring */}
+      {/* ... keeping everything else inside the card the same ... */}
       <div className="relative flex-shrink-0">
-        <img
-          src={getAvatarUrl(employee.id + employee.name)}
-          alt={employee.name}
-          className="h-11 w-11 rounded-full bg-slate-100 object-cover"
-        />
-        <span
-          className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
-            employee.presence === 'present'
-              ? 'bg-emerald-500'
-              : employee.presence === 'on_leave'
-              ? 'bg-sky-500'
-              : 'bg-amber-400'
-          }`}
-          title={PRESENCE_LABEL[employee.presence]}
-        />
+        <img src={getAvatarUrl(employee.id + employee.name)} alt={employee.name} className="h-11 w-11 rounded-full bg-[#f8f8f6] object-cover" />
+        <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${employee.presence === 'present' ? 'bg-[#4f8f1f]' : employee.presence === 'on_leave' ? 'bg-[#999999]' : 'bg-amber-500'}`} />
       </div>
 
-      {/* Name, role, location */}
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-sm font-semibold text-slate-800">{employee.name}</h3>
-        <p className="truncate text-sm text-slate-500">{employee.role}</p>
-        <p className="mt-0.5 truncate text-xs text-slate-400">{employee.location}</p>
+        <h3 className="truncate text-sm font-semibold text-[#333333]">{employee.name}</h3>
+        <p className="truncate text-sm text-[#666666]">{employee.role}</p>
       </div>
 
       {/* Overflow menu */}
@@ -501,12 +497,12 @@ function EmployeeGrid({
 }) {
   if (employees.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-3xl bg-white/60 py-24 text-center ring-1 ring-slate-900/5">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
-          <Users className="h-6 w-6 text-slate-400" strokeWidth={1.75} />
+      <div className="flex flex-col items-center justify-center rounded-3xl bg-white/60 py-24 text-center ring-1 ring-[#e4e4e1]">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#f0efec]">
+          <Users className="h-6 w-6 text-[#999999]" strokeWidth={1.75} />
         </div>
-        <p className="text-sm font-medium text-slate-600">No employees found matching "{searchQuery}"</p>
-        <p className="mt-1 text-sm text-slate-400">Try a different name, role, or department.</p>
+        <p className="text-sm font-medium text-[#444444]">No employees found matching "{searchQuery}"</p>
+        <p className="mt-1 text-sm text-[#999999]">Try a different name, role, or department.</p>
       </div>
     );
   }
@@ -521,7 +517,7 @@ function EmployeeGrid({
 }
 
 /* ============================================================================
-   9. EMPLOYEE MODAL
+   9. EMPLOYEE MODAL (RESPONSIVE FIX HIERARCHY)
    ========================================================================= */
 
 const DETAIL_ROWS = (employee: Employee) => [
@@ -545,17 +541,18 @@ function EmployeeModal({ employee, onClose }: { employee: Employee | null; onClo
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+            exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
             onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl"
+            className="flex flex-col w-full max-w-[calc(100%-16px)] sm:max-w-md max-h-[85vh] overflow-hidden rounded-2xl bg-white shadow-xl"
           >
-            <div className="relative p-6">
+            {/* Scrollable Content Body */}
+            <div className="relative flex-1 overflow-y-auto p-6 scrollbar-thin">
               <button
                 onClick={onClose}
-                className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                className="absolute right-4 top-4 rounded-full p-1.5 text-[#999999] transition-colors hover:bg-[#f0efec] hover:text-[#444444]"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -564,10 +561,10 @@ function EmployeeModal({ employee, onClose }: { employee: Employee | null; onClo
                 <img
                   src={getAvatarUrl(employee.id + employee.name)}
                   alt={employee.name}
-                  className="mb-4 h-24 w-24 rounded-full bg-slate-100 object-cover shadow-sm"
+                  className="mb-4 h-24 w-24 rounded-full bg-[#f8f8f6] object-cover shadow-sm"
                 />
-                <h2 className="text-2xl font-bold text-slate-800">{employee.name}</h2>
-                <p className="mt-1 font-medium text-indigo-600">{employee.role}</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-[#333333]">{employee.name}</h2>
+                <p className="mt-1 font-medium text-[#4f8f1f]">{employee.role}</p>
                 <div className="mt-4">
                   <StatusPill presence={employee.presence} />
                 </div>
@@ -577,24 +574,25 @@ function EmployeeModal({ employee, onClose }: { employee: Employee | null; onClo
                 {DETAIL_ROWS(employee).map(({ icon: Icon, label, value }) => (
                   <div
                     key={label}
-                    className="flex items-center gap-3.5 rounded-xl px-3 py-3 transition-colors hover:bg-slate-50"
+                    className="flex items-center gap-3.5 rounded-xl px-3 py-2.5 transition-colors hover:bg-[#f8f8f6]"
                   >
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                      <Icon className="h-4 w-4 text-slate-500" strokeWidth={2} />
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#f0efec]">
+                      <Icon className="h-4 w-4 text-[#666666]" strokeWidth={2} />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-slate-400">{label}</p>
-                      <p className="truncate text-sm font-medium text-slate-700">{value}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-[#999999]">{label}</p>
+                      <p className="truncate text-sm font-medium text-[#444444]">{value}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 bg-slate-50 p-4">
+            {/* Sticky/Fixed Footer Action */}
+            <div className="flex justify-end border-t border-[#e4e4e1] bg-[#f8f8f6] p-4 flex-shrink-0">
               <button
                 onClick={onClose}
-                className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                className="w-full sm:w-auto rounded-lg border border-[#d7d7d2] bg-white px-5 py-2 text-sm font-semibold text-[#444444] transition-colors hover:bg-[#f8f8f6]"
               >
                 Close
               </button>
@@ -626,7 +624,7 @@ export default function EmployeeDashboard() {
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#f8f8f6] font-sans text-[#333333]">
       <Navbar currentUser={CURRENT_USER} />
 
       <main className="mx-auto max-w-7xl px-6 pb-12">
